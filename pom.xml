@@ -24,7 +24,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- dependencies -->
-    <dgclib.version>0.4.0</dgclib.version>
+    <dgclib.version>latest</dgclib.version>
     <owasp.version>6.1.6</owasp.version>
     <spring.boot.version>2.4.4</spring.boot.version>
     <spring.cloud.version>2020.0.2</spring.cloud.version>
@@ -32,7 +32,7 @@
     <spring.security.version>5.4.6</spring.security.version>
     <lombok.version>1.18.20</lombok.version>
     <liquibase.version>4.3.3</liquibase.version>
-    <hcert-kotlin.version>1.2.0</hcert-kotlin.version>
+    <hcert-kotlin.version>1.3.0</hcert-kotlin.version>
     <kotlin.version>1.5.10</kotlin.version>
     <springdoc.version>1.5.7</springdoc.version>
     <junit.version>5.7.1</junit.version>
@@ -52,7 +52,7 @@
     <license.inceptionYear>2021</license.inceptionYear>
     <license.licenseName>apache_v2</license.licenseName>
     <!-- github -->
-    <github.organization>eu-digital-green-certificates</github.organization>
+<!--    <github.organization>eu-digital-green-certificates</github.organization>-->
     <github.project>dgca-issuance-service</github.project>
     <!-- sonar -->
     <sonar.organization>eu-digital-green-certificates</sonar.organization>
@@ -235,13 +235,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>ehn.techiop.hcert</groupId>
-      <artifactId>hcert-kotlin-jvm</artifactId>
-      <version>${hcert-kotlin.version}</version>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-serialization-json</artifactId>
+      <version>1.2.1</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
-      <artifactId>kotlinx-serialization-json</artifactId>
+      <artifactId>kotlinx-serialization-cbor</artifactId>
       <version>1.2.1</version>
     </dependency>
     <dependency>
@@ -292,6 +292,23 @@
     <dependency>
       <groupId>com.sap.hcp.cf.logging</groupId>
       <artifactId>cf-java-logging-support-logback</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>core</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>javase</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ehn.techiop.hcert</groupId>
+      <artifactId>hcert-kotlin-jvm</artifactId>
+      <version>${hcert-kotlin.version}</version>
     </dependency>
   </dependencies>
 

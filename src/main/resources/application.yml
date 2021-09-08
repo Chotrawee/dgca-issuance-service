@@ -1,5 +1,7 @@
 server:
   port: 8080
+  compression:
+    enabled: true
 spring:
   application:
     name: dgca-issuance-service
@@ -40,12 +42,12 @@ springdoc:
   swagger-ui:
     path: /swagger
 issuance:
-  dgciPrefix: URN:UVCI:V1:DE
-  keyStoreFile: certs/test.jks
-  keyStorePassword: dgca
-  certAlias: dev_ec
-  privateKeyPassword: dgca
-  countryCode: DE
+  dgciPrefix: ICT:MOPH:TH
+  keyStoreFile: certs/ict-moph.jks
+  keyStorePassword: moph@2021
+  certAlias: 1
+  privateKeyPassword: moph@2021
+  countryCode: TH
   tanExpirationHours: 2
   contextFile: context/context.json
   expiration:
@@ -54,8 +56,8 @@ issuance:
     test: 3
   endpoints:
     frontendIssuing: true
-    backendIssuing: false
-    testTools: false
+    backendIssuing: true
+    testTools: true
     wallet: true
     publishCert: true
     did: true

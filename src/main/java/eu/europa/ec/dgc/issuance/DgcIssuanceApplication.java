@@ -20,14 +20,40 @@
 
 package eu.europa.ec.dgc.issuance;
 
+
+import com.upokecenter.cbor.CBORObject;
+import com.upokecenter.cbor.CBORType;
+import ehn.techiop.hcert.kotlin.chain.Base45Service;
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service;
 import eu.europa.ec.dgc.issuance.config.IssuanceConfigProperties;
+import eu.europa.ec.dgc.issuance.entity.DgciEntity;
+import eu.europa.ec.dgc.issuance.entity.GreenCertificateType;
+import eu.europa.ec.dgc.issuance.restapi.controller.DgciBackendController;
+import eu.europa.ec.dgc.issuance.restapi.controller.DgciController;
+import eu.europa.ec.dgc.issuance.restapi.dto.*;
+import eu.europa.ec.dgc.issuance.service.DgciService;
+import eu.europa.ec.dgc.issuance.service.EdgcValidator;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterInputStream;
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+
 
 /**
  * The Application class.
@@ -36,6 +62,8 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @EnableConfigurationProperties({IssuanceConfigProperties.class})
 public class DgcIssuanceApplication extends SpringBootServletInitializer {
 
+    public static String url = "http://localhost:8080";
+
     /**
      * The main Method.
      *
@@ -43,5 +71,9 @@ public class DgcIssuanceApplication extends SpringBootServletInitializer {
      */
     public static void main(String[] args) {
         SpringApplication.run(DgcIssuanceApplication.class, args);
+        if(StringUtils.hasText(System.getProperty("hostname"))) {
+            url = System.getProperty("hostname");
+        }
     }
+
 }

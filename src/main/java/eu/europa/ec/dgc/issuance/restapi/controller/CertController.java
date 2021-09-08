@@ -20,6 +20,8 @@
 
 package eu.europa.ec.dgc.issuance.restapi.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.dgc.issuance.restapi.dto.EgcDecodeResult;
 import eu.europa.ec.dgc.issuance.restapi.dto.PublicKeyInfo;
 import eu.europa.ec.dgc.issuance.service.CertificateService;
@@ -28,16 +30,18 @@ import eu.europa.ec.dgc.issuance.utils.CborDumpService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Base64;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * The endpoint here are not public API and should be used only for developing testing purposes.
@@ -58,7 +62,7 @@ public class CertController {
     @Operation(
         summary = "dump base64 cbor byte stream, developing tool"
     )
-    @PostMapping(value = "dumpCBOR", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "dumpCBOR", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<String> decodeCbor(@RequestBody String cbor) throws IOException {
         StringWriter stringWriter = new StringWriter();
 
@@ -79,12 +83,25 @@ public class CertController {
         summary = "decode edgc, developing tool",
         description = "decode and validate edgc raw string, extract raw data of each decode stage"
     )
-    @PostMapping(value = "decodeEGC", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "decodeEGC", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<EgcDecodeResult> decodeEgCert(
         @RequestBody String prefixedEncodedCompressedCose) {
-
         EgcDecodeResult egcDecodeResult = edgcValidator.decodeEdgc(prefixedEncodedCompressedCose);
         return ResponseEntity.ok(egcDecodeResult);
+    }
+
+
+    @Operation(
+        summary = "decode edgc, developing tool",
+        description = "decode and validate edgc raw string, extract raw data of each decode stage"
+    )
+    @RequestMapping(path = "/verify/**", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    public String verify(HttpServletRequest qr) throws UnsupportedEncodingException, JsonProcessingException {
+        String decodedUrl = URLDecoder.decode(qr.getQueryString(), "UTF-8");
+        EgcDecodeResult egcDecodeResult = edgcValidator.decodeEdgc(decodedUrl);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String response = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(egcDecodeResult);
+        return response;
     }
 
 

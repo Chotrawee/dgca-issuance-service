@@ -35,6 +35,7 @@ import ehn.techiop.hcert.kotlin.chain.CborService;
 import ehn.techiop.hcert.kotlin.chain.Chain;
 import ehn.techiop.hcert.kotlin.chain.ChainResult;
 import ehn.techiop.hcert.kotlin.chain.CompressorService;
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService;
 import ehn.techiop.hcert.kotlin.chain.ContextIdentifierService;
 import ehn.techiop.hcert.kotlin.chain.CoseService;
 import ehn.techiop.hcert.kotlin.chain.CwtService;
@@ -55,6 +56,8 @@ import eu.europa.ec.dgc.issuance.restapi.dto.EgdcCodeData;
 import eu.europa.ec.dgc.issuance.restapi.dto.IssueData;
 import eu.europa.ec.dgc.issuance.restapi.dto.SignatureData;
 import eu.europa.ec.dgc.issuance.utils.HashUtil;
+
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -75,12 +78,16 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.Inflater;
+
 import kotlinx.serialization.SerializationException;
 import kotlinx.serialization.json.Json;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.bouncycastle.asn1.cms.CompressedData;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.web.server.Compression;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -408,13 +415,15 @@ public class DgciService {
             new Chain(higherOrderValidationService, schemaValidationService, cborService, cwtService, coseService,
                 compressorService, base45Service, contextIdentifierService);
         ChainResult chainResult = cborProcessingChain.encode(eudgc);
-
         EgdcCodeData egdcCodeData = new EgdcCodeData();
+
         egdcCodeData.setQrCode(chainResult.getStep5Prefixed());
+
         egdcCodeData.setDgci(dgci);
         Tan ta = Tan.create();
         egdcCodeData.setTan(ta.getRawTan());
 
+        System.out.println("Creating dgci...");
         DgciEntity dgciEntity = new DgciEntity();
         dgciEntity.setDgci(dgci);
         dgciEntity.setCertHash(Base64.getEncoder().encodeToString(computeCoseSignHash(chainResult.getStep2Cose())));
@@ -423,9 +432,25 @@ public class DgciService {
         dgciEntity.setGreenCertificateType(greenCertificateType);
         dgciEntity.setCreatedAt(ZonedDateTime.now());
         dgciEntity.setExpiresAt(ZonedDateTime.now().plus(expirationService.expirationForType(greenCertificateType)));
-        dgciRepository.saveAndFlush(dgciEntity);
+        dgciEntity = dgciRepository.saveAndFlush(dgciEntity);
 
         return egdcCodeData;
+    }
+
+    protected byte[] compress(byte[] input) throws Exception {
+        Inflater inflater = new Inflater();
+        inflater.setInput(input);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
+
+        byte[] buffer = new byte[1024];
+        while( !inflater.finished() ) {
+            int count = inflater.inflate(buffer);
+            outputStream.write(buffer, 0, count);
+        }
+
+        outputStream.close();
+        return outputStream.toByteArray();
     }
 
     private String updateCI(String dccJson, String dgci) {
