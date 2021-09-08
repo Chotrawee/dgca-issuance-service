@@ -444,7 +444,7 @@ public class DgciService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
 
         byte[] buffer = new byte[1024];
-        while( !inflater.finished() ) {
+        while(!inflater.finished()) {
             int count = inflater.inflate(buffer);
             outputStream.write(buffer, 0, count);
         }
