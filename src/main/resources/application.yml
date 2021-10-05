@@ -43,10 +43,10 @@ springdoc:
     path: /swagger
 issuance:
   dgciPrefix: ICT:MOPH:TH
-  keyStoreFile: certs/ict-moph.jks
-  keyStorePassword: moph@2021
-  certAlias: 1
-  privateKeyPassword: moph@2021
+  keyStoreFile: certs/test.jks
+  keyStorePassword: dgca
+  certAlias: dev_ec
+  privateKeyPassword: dgca
   countryCode: TH
   tanExpirationHours: 2
   contextFile: context/context.json

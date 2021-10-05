@@ -21,6 +21,7 @@
 package eu.europa.ec.dgc.issuance.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -58,6 +59,8 @@ import eu.europa.ec.dgc.issuance.restapi.dto.SignatureData;
 import eu.europa.ec.dgc.issuance.utils.HashUtil;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -82,6 +85,7 @@ import java.util.zip.Inflater;
 
 import kotlinx.serialization.SerializationException;
 import kotlinx.serialization.json.Json;
+import kotlinx.serialization.json.JsonConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -89,6 +93,9 @@ import org.bouncycastle.asn1.cms.CompressedData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.web.server.Compression;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+
+import th.co.digio.dgca.IgnoreUnknownKeys;
 
 @Slf4j
 @Component
@@ -388,12 +395,16 @@ public class DgciService {
     public EgdcCodeData createEdgc(String dccJson) {
         String dgci = dgciGenerator.newDgci();
         dccJson = updateCI(dccJson, dgci);
-
         GreenCertificate eudgc;
         try {
-            eudgc = Json.Default.decodeFromString(GreenCertificate.Companion.serializer(), dccJson);
+//            format.ignoreUnknownKeys = true;
+            Json json = new IgnoreUnknownKeys().setIgnoreTrue();
+            eudgc = json.decodeFromString(GreenCertificate.Companion.serializer(), dccJson);
         } catch (SerializationException se) {
             throw new WrongRequest(se.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw  new WrongRequest(e.getMessage());
         }
         GreenCertificateType greenCertificateType = GreenCertificateType.Vaccination;
         if (eudgc.getRecoveryStatements() != null) {
@@ -432,8 +443,7 @@ public class DgciService {
         dgciEntity.setGreenCertificateType(greenCertificateType);
         dgciEntity.setCreatedAt(ZonedDateTime.now());
         dgciEntity.setExpiresAt(ZonedDateTime.now().plus(expirationService.expirationForType(greenCertificateType)));
-        dgciEntity = dgciRepository.saveAndFlush(dgciEntity);
-
+//        dgciEntity = dgciRepository.saveAndFlush(dgciEntity);
         return egdcCodeData;
     }
 

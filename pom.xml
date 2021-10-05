@@ -255,6 +255,11 @@
       <version>0.2.1</version>
     </dependency>
     <dependency>
+      <groupId>th.co.digio.dgca</groupId>
+      <artifactId>dgca</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>com.augustcellars.cose</groupId>
       <artifactId>cose-java</artifactId>
       <version>1.1.0</version>
